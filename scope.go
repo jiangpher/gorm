@@ -120,6 +120,35 @@ func (scope *Scope) Fields() []*Field {
 					}
 					fieldValue = reflect.Indirect(fieldValue).FieldByName(name)
 				}
+				fields = append(fields, &Field{StructField: structField, Field: fieldValue, IsBlank: isBlank(fieldValue)})
+			} else {
+				fields = append(fields, &Field{StructField: structField, IsBlank: true})
+			}
+		}
+		scope.fields = &fields
+	}
+
+	return *scope.fields
+}
+
+// Fields get value's fields
+func (scope *Scope) UpdateFields() []*Field {
+	if scope.fields == nil {
+		var (
+			fields             []*Field
+			indirectScopeValue = scope.IndirectValue()
+			isStruct           = indirectScopeValue.Kind() == reflect.Struct
+		)
+
+		for _, structField := range scope.GetModelStruct().StructFields {
+			if isStruct {
+				fieldValue := indirectScopeValue
+				for _, name := range structField.Names {
+					if fieldValue.Kind() == reflect.Ptr && fieldValue.IsNil() {
+						fieldValue.Set(reflect.New(fieldValue.Type().Elem()))
+					}
+					fieldValue = reflect.Indirect(fieldValue).FieldByName(name)
+				}
 				_, ok := structField.TagSettingsGet("FORCE")
 				fields = append(fields, &Field{StructField: structField, Field: fieldValue, IsBlank: isBlank(fieldValue) && !ok})
 			} else {

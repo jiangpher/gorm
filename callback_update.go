@@ -73,7 +73,7 @@ func updateCallback(scope *Scope) {
 				sqls = append(sqls, fmt.Sprintf("%v = %v", scope.Quote(column), scope.AddToVars(value)))
 			}
 		} else {
-			for _, field := range scope.Fields() {
+			for _, field := range scope.UpdateFields() {
 				if scope.changeableField(field) {
 					if !field.IsPrimaryKey && field.IsNormal && (field.Name != "CreatedAt" || !field.IsBlank) {
 						if !field.IsForeignKey || !field.IsBlank || !field.HasDefaultValue {
